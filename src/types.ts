@@ -5,7 +5,6 @@ export interface ServerProfile {
   authEnabled: boolean
   username: string
   isDefault: boolean
-  autoConnect: boolean
   allowInsecureHttp: boolean
   lastStatus: ServerStatus
   lastConnectedAt: string | null

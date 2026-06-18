@@ -29,7 +29,7 @@
 
       <section class="mt-auto">
         <h2 class="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">About</h2>
-        <p class="text-sm mb-2">OpenCode Mobile Client</p>
+        <p class="text-sm mb-2">OpenCode Mobile &lt;Client&gt;</p>
         <p class="text-xs text-muted-foreground leading-relaxed"><strong>A mobile client for OpenCode servers.</strong> Connect to your self-hosted OpenCode instance over LAN or VPN / Tailscale. This is a fully open-source community project <strong>(not official)</strong>. You can find the code on <a href="https://github.com/bmpenuelas/opencode-mobile-client" target="_blank" rel="noopener noreferrer" class="text-blue-700 dark:text-blue-400 no-underline font-semibold">GitHub</a>, and submit issues and requests there. PRs are welcome! <span class="text-red-500">&#x2764;</span></p>
       </section>
     </div>

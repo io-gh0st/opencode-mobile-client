@@ -12,14 +12,29 @@ interface HealthCheckOptions {
 
 async function nativeRequest(url: string, headers: Record<string, string>, timeoutMs: number): Promise<{ status: number }> {
   const { CapacitorHttp } = await import('@capacitor/core')
-  const response = await (CapacitorHttp as any).request({
+  const requestOptions = {
     url,
-    method: 'HEAD',
     headers,
     connectTimeout: timeoutMs,
     readTimeout: timeoutMs,
-  })
-  return { status: response.status }
+  }
+
+  try {
+    const response = await (CapacitorHttp as any).request({
+      ...requestOptions,
+      method: 'HEAD',
+    })
+    return { status: response.status }
+  } catch {
+    // Some native HTTP stacks can reject HEAD 401/403 responses instead of
+    // surfacing their status code. Retry with GET so auth failures don't get
+    // collapsed into a generic offline/unreachable state.
+    const response = await (CapacitorHttp as any).request({
+      ...requestOptions,
+      method: 'GET',
+    })
+    return { status: response.status }
+  }
 }
 
 async function webRequest(url: string, headers: Record<string, string>, timeoutMs: number): Promise<{ status: number }> {
@@ -75,7 +90,7 @@ export async function checkServerHealth(options: HealthCheckOptions): Promise<He
     const statusName = classifyStatus(status, hasAuth)
 
     return {
-      reachable: statusName === 'connected',
+      reachable: statusName !== 'unreachable',
       status: statusName,
       statusCode: status,
     }

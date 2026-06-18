@@ -18,7 +18,6 @@ function createProfile(overrides: Record<string, any> = {}) {
     authEnabled: false,
     username: 'opencode',
     isDefault: false,
-    autoConnect: false,
     allowInsecureHttp: true,
     lastStatus: 'unknown' as const,
     lastConnectedAt: null,

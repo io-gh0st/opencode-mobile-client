@@ -20,6 +20,9 @@
     "release-prepare:android:open": "node ./scripts/release-prepare-native.mjs android --open",
     "release-prepare:ios": "node ./scripts/release-prepare-native.mjs ios",
     "release-prepare:ios:open": "node ./scripts/release-prepare-native.mjs ios --open",
+    "cap:assets:inputs": "node scripts/generate-asset-inputs.mjs",
+    "cap:assets:post": "node scripts/generate-asset-inputs.mjs --post-cap",
+    "cap:assets": "npm run cap:assets:inputs && npx capacitor-assets generate --ios --android --pwa && npm run cap:assets:post",
     "android:play:bundle": "node ./scripts/android-release.mjs bundleRelease",
     "android:play:apk": "node ./scripts/android-release.mjs assembleRelease"
   },
@@ -45,11 +48,13 @@
     "vue-router": "^5.1.0"
   },
   "devDependencies": {
+    "@capacitor/assets": "^3.0.5",
     "@types/node": "^24.12.3",
     "@vitejs/plugin-vue": "^6.0.6",
     "@vue/test-utils": "^2.4.11",
     "@vue/tsconfig": "^0.9.1",
     "jsdom": "^29.1.1",
+    "sharp": "^0.35.1",
     "typescript": "~6.0.2",
     "vite": "^8.0.12",
     "vitest": "^4.1.9",

@@ -41,15 +41,27 @@
           </div>
           <CardDescription class="text-xs break-all">{{ sanitizeUrl(profile.baseUrl) }}</CardDescription>
           <CardAction>
-          <div class="flex items-center">
-            <span class="text-xs">open</span>
-              <Button class="-ml-1" variant="ghost" size="sm" @click="connectTo(profile.id)" title="Connect">&#9654;</Button>
-          </div>
+            <button
+              type="button"
+              class="relative inline-flex items-center rounded-md text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/60"
+              @click="connectTo(profile.id)"
+              title="Connect"
+              aria-label="Open server"
+            >
+              <span aria-hidden="true" class="absolute -inset-2" />
+              <span class="text-xs">open</span>
+              <span class="-ml-1 inline-flex h-8 w-8 items-center justify-end text-sm">&#9654;</span>
+            </button>
           </CardAction>
         </CardHeader>
         <CardContent class="flex gap-1 flex-wrap">
-          <Badge v-if="profile.isDefault" variant="outline">Default</Badge>
-          <Badge v-if="profile.autoConnect" variant="secondary">Auto-connect</Badge>
+          <Badge
+            v-if="profile.isDefault"
+            variant="outline"
+            class="bg-muted/45 hover:bg-muted/45"
+          >
+            Default
+          </Badge>
           <Badge v-if="profile.authEnabled" variant="outline">Auth</Badge>
           <span class="ml-auto text-xs text-muted-foreground self-center">{{ statusLabel(profileStatus(profile)) }}</span>
         </CardContent>
@@ -93,12 +105,13 @@ onMounted(async () => {
 function sanitizeUrl(url: string): string { return sanitizeUrlForDisplay(url) }
 
 function profileStatus(profile: ServerProfile): string {
+  if (profile.id === connectionStore.lastWebviewServerId) return 'connected'
+  if (profile.lastStatus === 'auth_required') return 'auth_required'
+  if (profile.lastStatus === 'wrong_credentials') return 'wrong_credentials'
   const r = serverStore.reachable[profile.id]
-  if (r === true) {
-    if (profile.id === connectionStore.lastWebviewServerId) return 'connected'
-    return 'online'
-  }
-  return r === false ? 'offline' : 'unknown'
+  if (r === true) return 'online'
+  if (r === false) return 'offline'
+  return 'unknown'
 }
 function statusLabel(status: string): string {
   const map: Record<string, string> = {

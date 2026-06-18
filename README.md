@@ -1,12 +1,15 @@
-# OpenCode Mobile Client 📱
+# OpenCode Mobile &lt;Client&gt; 📱
 
-😵 A lightweight mobile client that wraps the [OpenCode](https://opencode.ai) Web UI for native Android and iOS. Connects to an already-running OpenCode `serve` or `web` server over LAN or VPN / Tailscale.
+💫 A lightweight mobile client that wraps the [OpenCode Web](https://opencode.ai/docs/web/) UI as native Android and iOS apps. Connects to an already-running OpenCode server over LAN or VPN / Tailscale.
+
+Chat with the agent on your phone while the agent and the server run on your computer and edit code and use all the tools available on it 🖥️
 
 ---
 
 ## Features
 
-- 🌐 Connect to any OpenCode server over HTTP/HTTPS (LAN or VPN)
+- 🌐 Connect to any OpenCode server over HTTP/HTTPS (LAN or VPN /
+            Tailscale when you're away from home🚶)
 - 📋 Multiple server profiles with auto-connect support
 - 🔑 Basic Auth support (matching OpenCode's `OPENCODE_SERVER_PASSWORD`)
 - 🎛️ Pull-down menu for server management while connected
@@ -34,7 +37,7 @@ export OPENCODE_SERVER_PASSWORD="your-secret-password"
 opencode serve --hostname 0.0.0.0 --port 4096
 ```
 
-When auth is enabled, the username defaults to `opencode` in the app.
+When auth is enabled, the username defaults to `opencode` in the app. Find more options in the [official docs](https://opencode.ai/docs/web/).
 
 ---
 

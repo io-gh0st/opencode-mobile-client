@@ -53,7 +53,6 @@ describe('connectionStore', () => {
       authEnabled: false,
       username: 'opencode',
       isDefault: false,
-      autoConnect: false,
       allowInsecureHttp: true,
       lastStatus: 'unknown',
       lastConnectedAt: null,
@@ -80,7 +79,6 @@ describe('connectionStore', () => {
       authEnabled: false,
       username: 'opencode',
       isDefault: false,
-      autoConnect: false,
       allowInsecureHttp: true,
       lastStatus: 'unknown',
       lastConnectedAt: null,
@@ -96,7 +94,7 @@ describe('connectionStore', () => {
 
   it('transitions to wrong_credentials on 401 with auth', async () => {
     vi.spyOn(healthModule, 'checkServerHealth').mockResolvedValue({
-      reachable: false,
+      reachable: true,
       status: 'wrong_credentials',
       statusCode: 401,
     })
@@ -108,7 +106,6 @@ describe('connectionStore', () => {
       authEnabled: true,
       username: 'opencode',
       isDefault: false,
-      autoConnect: false,
       allowInsecureHttp: true,
       lastStatus: 'unknown',
       lastConnectedAt: null,
@@ -125,7 +122,7 @@ describe('connectionStore', () => {
 
   it('transitions to auth_required on 401 without stored credentials', async () => {
     vi.spyOn(healthModule, 'checkServerHealth').mockResolvedValue({
-      reachable: false,
+      reachable: true,
       status: 'auth_required',
       statusCode: 401,
     })
@@ -137,7 +134,6 @@ describe('connectionStore', () => {
       authEnabled: true,
       username: 'opencode',
       isDefault: false,
-      autoConnect: false,
       allowInsecureHttp: true,
       lastStatus: 'unknown',
       lastConnectedAt: null,

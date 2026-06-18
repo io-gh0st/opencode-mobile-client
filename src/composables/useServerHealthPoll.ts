@@ -1,4 +1,4 @@
-import { onMounted, onUnmounted } from 'vue'
+import { onMounted, onUnmounted, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { useServerStore } from '@/stores/serverStore'
 
@@ -50,8 +50,35 @@ export function useServerHealthPoll() {
     }
   }
 
-  onMounted(() => start())
-  onUnmounted(() => stop())
+  function onVisibilityChange() {
+    if (document.visibilityState === 'visible' && !isWebviewPage()) {
+      pollNow()
+    }
+  }
+
+  function onWindowFocus() {
+    if (!isWebviewPage()) {
+      pollNow()
+    }
+  }
+
+  onMounted(() => {
+    start()
+    document.addEventListener('visibilitychange', onVisibilityChange)
+    window.addEventListener('focus', onWindowFocus)
+  })
+
+  onUnmounted(() => {
+    stop()
+    document.removeEventListener('visibilitychange', onVisibilityChange)
+    window.removeEventListener('focus', onWindowFocus)
+  })
+
+  watch(() => route.path, () => {
+    if (!isWebviewPage() && timer === null) {
+      start()
+    }
+  })
 
   window.addEventListener('offline', goOffline)
   window.addEventListener('online', goOnline)

@@ -40,10 +40,6 @@
             </div>
           </template>
           <div class="flex items-center gap-2">
-            <Switch id="autoConnect" v-model="form.autoConnect" />
-            <Label for="autoConnect">Auto-connect on app open</Label>
-          </div>
-          <div class="flex items-center gap-2">
             <Switch id="isDefault" v-model="form.isDefault" />
             <Label for="isDefault">Set as default server</Label>
           </div>
@@ -90,7 +86,6 @@ const form = ref({
   username: 'opencode',
   password: '',
   isDefault: serverStore.profiles.length === 0,
-  autoConnect: serverStore.profiles.length === 0,
   allowInsecureHttp: true,
 })
 
@@ -115,7 +110,7 @@ onMounted(async () => {
     if (profile) {
       form.value.name = profile.name; form.value.baseUrl = profile.baseUrl
       form.value.authEnabled = profile.authEnabled; form.value.username = profile.username
-      form.value.isDefault = profile.isDefault; form.value.autoConnect = profile.autoConnect
+      form.value.isDefault = profile.isDefault
       form.value.allowInsecureHttp = profile.allowInsecureHttp
       if (profile.authEnabled) {
         const pw = await serverStore.getPassword(profile.id)
@@ -125,7 +120,6 @@ onMounted(async () => {
   } else if (serverStore.profiles.length > 0) {
     form.value.name = `Server#${serverStore.profiles.length + 1}`
     form.value.isDefault = false
-    form.value.autoConnect = false
   }
 })
 
@@ -141,7 +135,7 @@ async function handleSubmit(): Promise<void> {
       name: form.value.name.trim(), baseUrl: normalizeUrl(form.value.baseUrl),
       authEnabled: form.value.authEnabled,
       username: form.value.authEnabled ? form.value.username || 'opencode' : 'opencode',
-      isDefault: form.value.isDefault, autoConnect: form.value.autoConnect,
+      isDefault: form.value.isDefault,
       allowInsecureHttp: form.value.allowInsecureHttp || true,
       lastStatus: 'unknown' as const, lastConnectedAt: null,
     }
