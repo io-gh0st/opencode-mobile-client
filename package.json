@@ -27,7 +27,13 @@
     "android:play:apk": "node ./scripts/android-release.mjs assembleRelease",
     "android:start-adb": "adb start-server",
     "android:install": "node ./scripts/android-install.mjs",
-    "store:verify": "node ./scripts/verify-store-readiness.mjs"
+    "store:verify": "node ./scripts/verify-store-readiness.mjs",
+    "screenshots:android:open": "node ./scripts/screenshots-android.mjs open",
+    "screenshots:android:guided": "node ./scripts/screenshots-android.mjs guided",
+    "screenshots:android:capture": "node ./scripts/screenshots-android.mjs capture",
+    "screenshots:ios:open": "node ./scripts/screenshots-ios.mjs open",
+    "screenshots:ios:guided": "node ./scripts/screenshots-ios.mjs guided",
+    "screenshots:ios:capture": "node ./scripts/screenshots-ios.mjs capture"
   },
   "dependencies": {
     "@aparajita/capacitor-secure-storage": "^8.0.0",

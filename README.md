@@ -12,7 +12,7 @@ Chat with the agent on your phone while the agent and the server run on your com
             Tailscale when you're away from home🚶)
 - 📋 Multiple server profiles with auto-connect support
 - 🔑 Basic Auth support (matching OpenCode's `OPENCODE_SERVER_PASSWORD`)
-- 🎛️ Pull-down menu for server management while connected
+- 🎛️ Pull-down menu for server management while connected. Pull to refresh, tap ⋮ to open menu.
 - ❤️ Automatic health checks with exponential reconnect
 - 🔒 Secure storage for passwords (Keychain/EncryptedSharedPreferences)
 - 🌓 Dark theme with light theme support (`prefers-color-scheme`)

@@ -121,7 +121,7 @@ const statusForDot = computed(() => {
   const ls = defaultProfile.value.lastStatus
   if (ls === 'auth_required' || ls === 'wrong_credentials') return ls
   const r = serverStore.reachable[defaultProfile.value.id]
-  return r === true ? 'online' : r === false ? 'offline' : 'unknown'
+  return r === true ? 'online' : r === false ? 'offline' : 'checking'
 })
 
 const canConnect = computed(() => !!defaultProfile.value)
@@ -136,7 +136,7 @@ const stateLabel = computed(() => {
     if (defaultProfile.value.id === connectionStore.lastWebviewServerId) return 'Connected'
     return 'Ready to connect'
   }
-  return r === false ? 'Offline' : 'Ready to connect'
+  return r === false ? 'Offline' : 'Checking...'
 })
 
 function sanitizeUrl(url: string): string { return sanitizeUrlForDisplay(url) }
