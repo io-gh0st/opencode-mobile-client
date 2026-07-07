@@ -27,6 +27,7 @@ import { Button } from '@/components/ui/button'
 import DemoSessionMock from '@/components/DemoSessionMock.vue'
 import { InAppBrowser, ToolBarType, BackgroundColor } from '@capgo/capacitor-inappbrowser'
 import { Capacitor } from '@capacitor/core'
+import { App } from '@capacitor/app'
 import { useServerStore } from '@/stores/serverStore'
 import { useConnectionStore } from '@/stores/connectionStore'
 import { registerBackButton, unregisterBackButton } from '@/services/platform/backButton'
@@ -55,19 +56,22 @@ const demoModeActive = ref(false)
 let browserClosedHandle: any = null
 let pageLoadedHandle: any = null
 let messageFromWebviewHandle: any = null
+let appStateHandle: any = null
 let notificationPromptResolver: ((value: boolean) => void) | null = null
 let notificationPromptPromise: Promise<boolean> | null = null
-
-const WEB_NOTIFICATION_PROMPT_RESPONSE_MESSAGE_TYPE = 'opencode:web-notification-prompt-response'
 
 function removeWebviewListeners(): void {
   if (browserClosedHandle) void browserClosedHandle.remove()
   if (pageLoadedHandle) void pageLoadedHandle.remove()
   if (messageFromWebviewHandle) void messageFromWebviewHandle.remove()
+  if (appStateHandle) void appStateHandle.remove()
   browserClosedHandle = null
   pageLoadedHandle = null
   messageFromWebviewHandle = null
+  appStateHandle = null
 }
+
+const WEB_NOTIFICATION_PROMPT_RESPONSE_MESSAGE_TYPE = 'opencode:web-notification-prompt-response'
 
 function buildNotificationBridgeScript(): string {
   return `(function(){
@@ -410,13 +414,24 @@ async function openInAppBrowser(): Promise<void> {
     await InAppBrowser.executeScript({ code: script })
   })
 
+  appStateHandle = await App.addListener('appStateChange', (state) => {
+    if (state.isActive) {
+      InAppBrowser.executeScript({
+        code: `(function(){
+          var dot = document.querySelector('#opencode-titlebar-right > div > div > div:nth-child(1) > button > div > div.bg-icon-critical-base');
+          if (dot) { window.location.reload(); }
+        })();`
+      }).catch(() => {})
+    }
+  })
+
   try {
     await InAppBrowser.openWebView({
       url,
       toolbarType: ToolBarType.BLANK,
       toolbarColor: '#121212',
       backgroundColor: BackgroundColor.BLACK,
-      useTopInset: true,
+      useTopInset: false,
       enabledSafeBottomMargin: true,
       disableOverscroll: true,
       activeNativeNavigationForWebview: true,
