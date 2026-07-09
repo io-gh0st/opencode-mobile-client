@@ -136,7 +136,7 @@ function checkAdbDevices() {
   return targetSerial;
 }
 
-run("1/3", "npm", ["run", "cap:sync"]);
+run("1/3", "npm", ["run", "cap:sync:android"]);
 run("2/3", "npx", ["cap", "copy", "android"]);
 
 const targetSerial = checkAdbDevices();
