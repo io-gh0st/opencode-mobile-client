@@ -1,47 +1,31 @@
 name: Build Android APK
 
-# Trigger workflow on push to main branch and manual dispatch
 on:
   push:
-    branches:
-      - main
+    branches: [main]
   workflow_dispatch:
 
-# Environment variables
-env:
-  NODE_VERSION: '18'
-  JAVA_VERSION: '17'
-  GRADLE_CACHE_DIR: ~/.gradle
-
 jobs:
-  build-apk:
+  build:
     name: Build Release APK
     runs-on: ubuntu-latest
-    timeout-minutes: 30
 
     steps:
-      # Checkout source code
       - name: Checkout code
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
 
-      # Setup Node.js (pinned to v18 - avoid Node 24 deprecation)
-      - name: Setup Node.js 18
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '18'
           cache: 'npm'
 
-      # Setup Java (pinned to v17)
-      - name: Setup Java 17
+      - name: Setup Java
         uses: actions/setup-java@v4
         with:
-          java-version: '17'
           distribution: 'temurin'
-          cache: 'gradle'
+          java-version: '17'
 
-      # Setup Android SDK with correct parameters
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
         with:
@@ -51,67 +35,39 @@ jobs:
           packages: |
             platforms;android-34
             build-tools;34.0.0
-            ndk;26.1.10909125
-            cmake;3.22.1
+            platform-tools
 
-      # Install npm dependencies
-      - name: Install npm dependencies
+      - name: Install dependencies
         run: npm install
-        shell: bash
 
-      # Build for production
       - name: Build production bundle
         run: npm run build
-        shell: bash
 
-      # Sync Capacitor native projects
-      - name: Sync Capacitor projects
-        run: npx cap sync
-        shell: bash
+      - name: Add Android platform
+        run: npx cap add android || npx cap sync android
 
-      # Display build environment info
-      - name: Display build environment
-        run: |
-          echo "=== Node.js Version ==="
-          node --version
-          npm --version
-          echo "=== Java Version ==="
-          java -version
-          echo "=== Gradle Version ==="
-          ./gradlew --version
-          echo "=== Android SDK Info ==="
-          $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager --list_installed
+      - name: Sync Capacitor
+        run: npx cap sync android
 
-      # Build debug APK
+      - name: Grant execute permission for gradlew
+        run: chmod +x android/gradlew
+
       - name: Build debug APK
-        run: cd android && ./gradlew assembleDebug --stacktrace
-        shell: bash
-        timeout-minutes: 15
+        working-directory: android
+        run: ./gradlew assembleDebug --stacktrace
 
-      # List generated APKs
-      - name: List generated APKs
-        run: |
-          echo "=== Generated APKs ==="
-          find android/app/build/outputs/apk -name "*.apk" -type f
-        shell: bash
-
-      # Upload APK as artifact
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
           name: opencode-mobile-client-apk
-          path: android/app/build/outputs/apk/**/app-debug.apk
-          retention-days: 30
-          if-no-files-found: warn
+          path: android/app/build/outputs/apk/debug/app-debug.apk
+          retention-days: 14
 
-      # Build success notification
-      - name: Build completed successfully
-        if: success()
-        run: echo "✅ APK build completed successfully!"
-
-      # Error notification
-      - name: Build failed notification
-        if: failure()
-        run: |
-          echo "❌ APK build failed!"
-          exit 1
+# ---------------------------------------------------------------
+# After the workflow finishes:
+#   1. Go to Actions -> this run -> Artifacts section
+#   2. Download "opencode-mobile-client-apk"
+#   3. Unzip it if needed to get app-debug.apk
+#   4. Install: adb install -r app-debug.apk
+#      (or transfer to phone and tap it in the file manager)
+# ---------------------------------------------------------------
