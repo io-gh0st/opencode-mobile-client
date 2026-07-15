@@ -1,0 +1,113 @@
+name: Build Android APK
+
+# Trigger workflow on push to main branch and manual dispatch
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+# Environment variables
+env:
+  NODE_VERSION: '18'
+  JAVA_VERSION: '17'
+  ANDROID_API_LEVEL: '34'
+  GRADLE_CACHE_DIR: ~/.gradle
+
+jobs:
+  build-apk:
+    name: Build Release APK
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      # Checkout source code
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      # Setup Node.js
+      - name: Setup Node.js ${{ env.NODE_VERSION }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      # Setup Java
+      - name: Setup Java ${{ env.JAVA_VERSION }}
+        uses: actions/setup-java@v4
+        with:
+          java-version: ${{ env.JAVA_VERSION }}
+          distribution: 'temurin'
+          cache: 'gradle'
+
+      # Setup Android SDK
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+        with:
+          api-level: ${{ env.ANDROID_API_LEVEL }}
+          ndk-version: '25.2.9519653'
+          cmake-version: '3.22.1'
+
+      # Install npm dependencies
+      - name: Install npm dependencies
+        run: npm install
+        shell: bash
+
+      # Build for production
+      - name: Build production bundle
+        run: npm run build
+        shell: bash
+
+      # Sync Capacitor native projects
+      - name: Sync Capacitor projects
+        run: npx cap sync
+        shell: bash
+
+      # Display build environment info
+      - name: Display build environment
+        run: |
+          echo "=== Node.js Version ==="
+          node --version
+          npm --version
+          echo "=== Java Version ==="
+          java -version
+          echo "=== Gradle Version ==="
+          ./gradlew --version
+          echo "=== Android SDK Info ==="
+          $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager --list_installed
+
+      # Build debug APK
+      - name: Build debug APK
+        run: cd android && ./gradlew assembleDebug --stacktrace
+        shell: bash
+        timeout-minutes: 15
+
+      # List generated APKs
+      - name: List generated APKs
+        run: |
+          echo "=== Generated APKs ==="
+          find android/app/build/outputs/apk -name "*.apk" -type f
+        shell: bash
+
+      # Upload APK as artifact
+      - name: Upload APK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: opencode-mobile-client-apk
+          path: android/app/build/outputs/apk/**/app-debug.apk
+          retention-days: 30
+          if-no-files-found: warn
+
+      # Build success notification
+      - name: Build completed successfully
+        if: success()
+        run: echo "✅ APK build completed successfully!"
+
+      # Error notification
+      - name: Build failed notification
+        if: failure()
+        run: |
+          echo "❌ APK build failed!"
+          exit 1
