@@ -32,10 +32,12 @@ jobs:
           cmdline-tools-version: latest
           accept-android-sdk-licenses: true
           log-accepted-android-sdk-licenses: true
-          packages: |
-            platforms;android-34
-            build-tools;34.0.0
-            platform-tools
+
+      - name: Install Android SDK packages
+        run: |
+          yes | sdkmanager "platforms;android-34"
+          yes | sdkmanager "build-tools;34.0.0"
+          yes | sdkmanager "platform-tools"
 
       - name: Install dependencies
         run: npm install
