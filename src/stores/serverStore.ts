@@ -5,6 +5,9 @@ import { profileStorage } from '@/services/storage/profileStorage'
 import { getSecretStorage } from '@/services/storage'
 import { checkServerHealth } from '@/services/opencode/health'
 
+const EMBEDDED_SERVER_ID = 'embedded-local-server'
+const EMBEDDED_SERVER_URL = 'http://127.0.0.1:4096'
+
 export const useServerStore = defineStore('server', () => {
   const profiles = ref<ServerProfile[]>([])
   const loading = ref(false)
@@ -20,12 +23,50 @@ export const useServerStore = defineStore('server', () => {
     })
   )
 
+  const embeddedServerProfile = computed(() => 
+    profiles.value.find((p: ServerProfile) => p.id === EMBEDDED_SERVER_ID)
+  )
+
   async function load(): Promise<void> {
     loading.value = true
     try {
       profiles.value = await profileStorage.loadProfiles()
+      
+      // Ensure embedded server profile exists
+      if (!embeddedServerProfile.value) {
+        await ensureEmbeddedServerProfile()
+      }
     } finally {
       loading.value = false
+    }
+  }
+
+  async function ensureEmbeddedServerProfile(): Promise<void> {
+    const existing = profiles.value.find((p: ServerProfile) => p.id === EMBEDDED_SERVER_ID)
+    if (existing) return
+
+    const embeddedProfile: Omit<ServerProfile, 'id'> = {
+      name: 'Local OpenCode',
+      baseUrl: EMBEDDED_SERVER_URL,
+      authEnabled: false,
+      username: '',
+      isDefault: false,
+      lastStatus: 'disconnected',
+      lastConnectedAt: null,
+    }
+
+    try {
+      const profile = await profileStorage.createProfile(embeddedProfile)
+      // Override the ID to be our embedded server ID
+      const stored = await profileStorage.updateProfile(profile.id, { ...embeddedProfile })
+      if (stored) {
+        const index = profiles.value.findIndex((p: ServerProfile) => p.id === profile.id)
+        if (index !== -1) {
+          profiles.value[index].id = EMBEDDED_SERVER_ID
+        }
+      }
+    } catch (e) {
+      console.error('Failed to create embedded server profile', e)
     }
   }
 
@@ -148,6 +189,7 @@ export const useServerStore = defineStore('server', () => {
     loading,
     defaultProfile,
     sortedProfiles,
+    embeddedServerProfile,
     reachable,
     load,
     save,
@@ -160,5 +202,6 @@ export const useServerStore = defineStore('server', () => {
     setPassword,
     deletePassword,
     checkAllServers,
+    ensureEmbeddedServerProfile,
   }
 })
